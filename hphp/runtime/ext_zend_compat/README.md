@@ -13,7 +13,7 @@ to our data structures and it mostly works.
 
   # If your extension has docs on php.net you can make the idl like this:
   cd system/idl
-  php newexp.php <ext_name>
+  php newext.php <ext_name>
   # Otherwise you have to make the .idl by hand
 
   <setup the build environment>

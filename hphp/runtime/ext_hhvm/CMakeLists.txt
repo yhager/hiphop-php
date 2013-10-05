@@ -57,7 +57,7 @@ foreach (header ${CXX_HEADERS})
 endforeach()
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-foreach (zext calendar ftp gettext oauth yaml)
+foreach (zext calendar ftp gettext oauth yaml xdiff)
 	list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/${zext}.idl.json")
 endforeach ()
 

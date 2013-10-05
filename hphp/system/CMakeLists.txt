@@ -1,5 +1,5 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-foreach (zext calendar ftp gettext oauth yaml)
+foreach (zext calendar ftp gettext oauth yaml xdiff)
 	list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/${zext}.idl.json")
 endforeach ()
 
