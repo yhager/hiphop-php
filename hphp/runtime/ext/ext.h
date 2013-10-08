@@ -85,6 +85,7 @@
 #include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_url.h"
 #include "hphp/runtime/ext/ext_variable.h"
+#include "hphp/runtime/ext/ext_xdiff.h"
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_xmlwriter.h"
