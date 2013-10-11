@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/hash/hash_fnv1.h"
 #include "hphp/runtime/ext/hash/hash_furc.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/ext/ext_xdiff.h"
 
 #if defined(HPHP_OSS)
 #define furc_hash furc_hash_internal
@@ -52,6 +53,7 @@ static class HashExtension : public Extension {
     HHVM_FE(hash_update);
     HHVM_FE(furchash_hphp_ext);
     HHVM_FE(hphp_murmurhash);
+    xdiff_keepme();
   }
 } s_hash_extension;
 

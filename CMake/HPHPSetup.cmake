@@ -21,6 +21,7 @@ else ()
 	    hphp_zend
 	    hphp_util
 	    vixl neo
+	    xdiff
             -Wl,-uregister_libevent_server)
 endif ()
 

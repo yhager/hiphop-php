@@ -3,14 +3,38 @@
 
 namespace HPHP {
 
+static void xdiff_init();
+
 static class XdiffExtension : public Extension {
 public:
   XdiffExtension() : Extension("xdiff") { }
   virtual void moduleLoad(Hdf config) {
     HHVM_FE(xdiff_string_rabdiff);
+		xdiff_init();
   }
 } s_xdiff_extension;
 
+
+bool xdiff_keepme() {
+	return true;
+}
+
+void* xdiff_malloc(void *, unsigned int size) {
+  return malloc(size);
+}
+
+void xdiff_free(void *priv, void* ptr) {
+  free(ptr);
+}
+
+void* xdiff_realloc(void *priv, void* ptr, unsigned int size) {
+  return realloc(ptr, size);
+}
+
+static void xdiff_init() {
+  memallocator_t malt = {NULL, xdiff_malloc, xdiff_free, xdiff_realloc};
+	xdl_set_allocator(&malt);
+}
 
 static mmfile_t* make_mmfile(const String& str)
 {
@@ -21,7 +45,7 @@ static mmfile_t* make_mmfile(const String& str)
     return nullptr;
   }
 
-  void *mem = xdl_mmfile_writeallocate(mmfile, str.length());
+  void *mem = xdl_mmfile_writeallocate(mmfile, (long)str.length());
   if (!mem) {
     xdl_free_mmfile(mmfile);
     free(mmfile);
@@ -44,25 +68,27 @@ Variant HHVM_FUNCTION(xdiff_string_rabdiff, const String& old_data,
                       const String& new_data) {
 	mmfile_t *mmold, *mmnew;
 
-  SCOPE_EXIT {
-    xdl_free_mmfile(mmold);
-    xdl_free_mmfile(mmnew);
-  };
-
   mmold = make_mmfile(old_data);
+	if (!mmold) 
+					return false;
   mmnew = make_mmfile(new_data);
-
-  if (!mmold || !mmnew)
-    return false;
-
+	if (!mmnew) {
+					xdl_free_mmfile(mmold);
+					return false;
+	}
   xdemitcb_t ecb;
   String output;
   ecb.priv = &output;
   ecb.outf = append_string;
 
-	if (xdl_rabdiff(mmold, mmnew, &ecb) < 0)
-    return false;
+	if (xdl_rabdiff(mmold, mmnew, &ecb) < 0) {
+    xdl_free_mmfile(mmold);
+	  xdl_free_mmfile(mmnew);
+		return false;
+	}
 
+  xdl_free_mmfile(mmold);
+	xdl_free_mmfile(mmnew);
   return output;
 }
 
