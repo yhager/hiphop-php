@@ -6,8 +6,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool xdiff_keepme();
-Variant HHVM_FUNCTION(xdiff_string_rabdiff, const String& str1, const String& str2);
+void xdiff_keepme();
+Variant HHVM_FUNCTION(xdiff_string_rabdicff, const String& str1, const String& str2);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
