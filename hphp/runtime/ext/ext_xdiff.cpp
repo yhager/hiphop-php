@@ -37,7 +37,7 @@ public:
     xdl_free_mmfile(&m_mmfile);
   }
 
-  mmfile_t* get() const {
+  mmfile_t* get() {
     return &m_mmfile;
   }
 };
@@ -48,8 +48,8 @@ class XdiffOutput {
   String m_output;
 public:
   XdiffOutput() {
-    m_ecb.priv = &output;
-    cb.outf = XdiffOutput::appendString;
+    m_ecb.priv = &m_output;
+    m_ecb.outf = XdiffOutput::appendString;
   }
   static int appendString(void *ptr, mmbuffer_t* bufs, int count) {
     assert(ptr);
@@ -61,18 +61,18 @@ public:
     return 0;
   }
 
-  xdemitcb_t* get() const {
+  xdemitcb_t* get() {
     return &m_ecb;
   }
 
-  String output() {
+  String output() const {
     return m_output;
   }
 };
 
 void xdiff_keepme() {}
 
-void* php_malloc(void *, unsigned int size) {
+void* php_malloc(void*, unsigned int size) {
   return malloc(size);
 }
 
@@ -81,7 +81,7 @@ void php_free(void*, void* ptr) {
   free(ptr);
 }
 
-void* php_realloc(void , void* ptr, unsigned int size) {
+void* php_realloc(void*, void* ptr, unsigned int size) {
   assert(ptr);
   return realloc(ptr, size);
 }
@@ -95,7 +95,7 @@ Variant HHVM_FUNCTION(xdiff_string_bdiff_size, const String& patch) {
   return xdl_bdiff_tgsize(XdiffMmFile(patch).get());
 }
 
-Variant HHVM_FUNCTION(xdiff_string_bdiff, const String& old_data
+Variant HHVM_FUNCTION(xdiff_string_bdiff, const String& old_data,
                                           const String& new_data) {
   XdiffMmFile xold(old_data), xnew(new_data);
   XdiffOutput o;
@@ -106,6 +106,7 @@ Variant HHVM_FUNCTION(xdiff_string_bdiff, const String& old_data
 
   return o.output();
 }
+
 Variant HHVM_FUNCTION(xdiff_string_bpatch, const String& str,
                                            const String& patch) {
   XdiffMmFile xstr(str), xpatch(patch);
@@ -121,7 +122,7 @@ Variant HHVM_FUNCTION(xdiff_string_diff, const String& old_data,
                                          const String& new_data,
                                          int context /* =3 */,
                                          bool minimal /* = false */) {
-  XdiffMmFile xold(old_dat), xnew(new_data);
+  XdiffMmFile xold(old_data), xnew(new_data);
   XdiffOutput o;
   xpparam_t params = { minimal ? XDF_NEED_MINIMAL : 0 };
   xdemitconf_t conf = { abs(context) };
@@ -132,38 +133,40 @@ Variant HHVM_FUNCTION(xdiff_string_diff, const String& old_data,
   return o.output();
 }
 
-Variant HHVM_FUNCTION(xdiff_string_merge3,
-                      const String& old_data,
-                      const String& new_data1,
-                      const String& new_data2,
-                      String& error /* = ? */) {
+Variant HHVM_FUNCTION(xdiff_string_merge3, const String& old_data,
+                                           const String& new_data1,
+                                           const String& new_data2,
+                                           String& error /* = null_string */) {
   XdiffMmFile xold(old_data), xnew1(new_data1), xnew2(new_data2);
   XdiffOutput o, e;
 
   if (xdl_merge3(xold.get(), xnew1.get(), xnew2.get(), o.get(), e.get()) < 0)
     return false;
 
-  error = e.output();
+  if (!error.empty())
+    error = e.output();
+
   return o.output();
 }
 
-Variant HHVM_FUNCTION(xdiff_string_patch,
-                      const String& str,
-                      const String& patch,
-                      int flags /* = XDIFF_PATCH_NORMAL */,
-                      String& error /* = ? */) {
+Variant HHVM_FUNCTION(xdiff_string_patch, const String& str,
+                                          const String& patch,
+                                          int64_t flags /* = XDIFF_PATCH_NORMAL */,
+                                          String& error /* = null_string */) {
   XdiffMmFile xstr(str), xpatch(patch);
   XdiffOutput o, e;
 
   if (xdl_patch(xstr.get(), xpatch.get(), flags, o.get(), e.get()) < 0) {
     return false;
   }
-  error = e.output();
+  if (!error.empty())
+    error = e.output();
+  
   return o.output();
 }
 
 Variant HHVM_FUNCTION(xdiff_string_rabdiff, const String& old_data,
-                      const String& new_data) {
+                                            const String& new_data) {
   XdiffMmFile xold(old_data), xnew(new_data);
   XdiffOutput o;
 
